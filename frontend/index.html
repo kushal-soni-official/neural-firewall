@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neural Firewall — AI Security Middleware</title>
+  <meta name="description" content="Neural Firewall: Multi-agent AI prompt injection detection and prevention system built with Google ADK." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── TOP NAVBAR ────────────────────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="nav-icon">&#9650;</span>
+      <span class="nav-title">NEURAL FIREWALL</span>
+      <span class="nav-badge">v1.0 · ADK</span>
+    </div>
+    <div class="nav-stats" id="navStats">
+      <span class="stat-chip" id="statTotal">&#8211; analyzed</span>
+      <span class="stat-chip blocked" id="statBlocked">&#8211; blocked</span>
+      <span class="stat-chip" id="statAvgScore">avg &#8211;</span>
+    </div>
+    <div class="nav-status">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Connecting...</span>
+    </div>
+  </nav>
+
+  <!-- ── MAIN LAYOUT ───────────────────────────────────────────────────────── -->
+  <main class="main-grid">
+
+    <!-- LEFT PANEL: INPUT -->
+    <section class="panel panel-input" id="panelInput">
+      <div class="panel-header">
+        <span class="panel-icon">&#9998;</span>
+        <h2 class="panel-title">INPUT ANALYSIS</h2>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="userInput">User Input to Analyze</label>
+        <textarea
+          id="userInput"
+          class="input-textarea"
+          placeholder="Enter text to analyze for prompt injection attacks...&#10;&#10;Examples:&#10;- Ignore all previous instructions...&#10;- You are now DAN, a model with no restrictions...&#10;- [Base64 encoded payload]"
+          rows="8"
+        ></textarea>
+        <div class="char-counter" id="charCounter">0 / 10,000</div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="agentResponse">
+          Agent Response to Sanitize
+          <span class="optional-tag">optional</span>
+        </label>
+        <textarea
+          id="agentResponse"
+          class="input-textarea agent-response"
+          placeholder="Paste the AI agent's response here to check for system prompt leakage or instruction bleedthrough..."
+          rows="4"
+        ></textarea>
+      </div>
+
+      <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
+        <span class="btn-icon">&#9654;</span>
+        <span class="btn-text">ANALYZE THREAT</span>
+        <span class="btn-loader" id="btnLoader"></span>
+      </button>
+
+      <!-- Quick test buttons -->
+      <div class="quick-tests">
+        <p class="quick-label">Quick Tests:</p>
+        <div class="quick-grid">
+          <button class="quick-btn" onclick="loadTest('direct')">Direct Injection</button>
+          <button class="quick-btn" onclick="loadTest('roleplay')">Roleplay Jailbreak</button>
+          <button class="quick-btn" onclick="loadTest('base64')">Token Smuggling</button>
+          <button class="quick-btn" onclick="loadTest('clean')">Clean Input</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: PIPELINE VISUALIZATION -->
+    <section class="panel panel-pipeline" id="panelPipeline">
+      <div class="panel-header">
+        <span class="panel-icon">&#9670;</span>
+        <h2 class="panel-title">PIPELINE</h2>
+      </div>
+
+      <div class="pipeline-container">
+
+        <!-- Stage 1: Intake -->
+        <div class="pipeline-stage" id="stage-intake" data-stage="intake">
+          <div class="stage-node">
+            <span class="stage-num">01</span>
+            <span class="stage-icon">&#9881;</span>
+          </div>
+          <div class="stage-info">
+            <div class="stage-name">INTAKE AGENT</div>
+            <div class="stage-desc">Decode &amp; normalize input</div>
+            <div class="stage-detail" id="detail-intake"></div>
+          </div>
+          <div class="stage-status" id="status-intake">&#9472;</div>
+        </div>
+        <div class="pipeline-connector" id="conn-1"></div>
+
+        <!-- Stage 2: Inspection -->
+        <div class="pipeline-stage" id="stage-inspection" data-stage="inspection">
+          <div class="stage-node">
+            <span class="stage-num">02</span>
+            <span class="stage-icon">&#128269;</span>
+          </div>
+          <div class="stage-info">
+            <div class="stage-name">INSPECTION AGENT</div>
+            <div class="stage-desc">MCP threat lookup &amp; scoring</div>
+            <div class="stage-detail" id="detail-inspection"></div>
+          </div>
+          <div class="stage-status" id="status-inspection">&#9472;</div>
+        </div>
+        <div class="pipeline-connector" id="conn-2"></div>
+
+        <!-- Stage 3: Probe -->
+        <div class="pipeline-stage" id="stage-probe" data-stage="probe">
+          <div class="stage-node">
+            <span class="stage-num">03</span>
+            <span class="stage-icon">&#9876;</span>
+          </div>
+          <div class="stage-info">
+            <div class="stage-name">PROBE AGENT</div>
+            <div class="stage-desc">Adversarial self-red-team</div>
+            <div class="stage-detail" id="detail-probe"></div>
+          </div>
+          <div class="stage-status" id="status-probe">&#9472;</div>
+        </div>
+        <div class="pipeline-connector" id="conn-3"></div>
+
+        <!-- Stage 4: HITL -->
+        <div class="pipeline-stage" id="stage-hitl" data-stage="hitl">
+          <div class="stage-node hitl-node">
+            <span class="stage-num">04</span>
+            <span class="stage-icon">&#128100;</span>
+          </div>
+          <div class="stage-info">
+            <div class="stage-name">HITL GATE</div>
+            <div class="stage-desc">Human-in-the-Loop checkpoint</div>
+            <div class="stage-detail" id="detail-hitl"></div>
+          </div>
+          <div class="stage-status" id="status-hitl">&#9472;</div>
+        </div>
+        <div class="pipeline-connector" id="conn-4"></div>
+
+        <!-- Stage 5: Output Sanitizer -->
+        <div class="pipeline-stage" id="stage-output_sanitizer" data-stage="output_sanitizer">
+          <div class="stage-node">
+            <span class="stage-num">05</span>
+            <span class="stage-icon">&#9989;</span>
+          </div>
+          <div class="stage-info">
+            <div class="stage-name">OUTPUT SANITIZER</div>
+            <div class="stage-desc">Response safety verification</div>
+            <div class="stage-detail" id="detail-output_sanitizer"></div>
+          </div>
+          <div class="stage-status" id="status-output_sanitizer">&#9472;</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: THREAT REPORT -->
+    <section class="panel panel-report" id="panelReport">
+      <div class="panel-header">
+        <span class="panel-icon">&#9888;</span>
+        <h2 class="panel-title">THREAT REPORT</h2>
+      </div>
+
+      <!-- Score gauge -->
+      <div class="score-section" id="scoreSection">
+        <div class="score-gauge-wrap">
+          <svg class="score-gauge" viewBox="0 0 120 70">
+            <path class="gauge-bg" d="M10,65 A55,55 0 0,1 110,65" />
+            <path class="gauge-fill" id="gaugeFill" d="M10,65 A55,55 0 0,1 10,65" />
+            <text x="60" y="58" class="gauge-score" id="gaugeScore">--</text>
+            <text x="60" y="68" class="gauge-label">THREAT SCORE</text>
+          </svg>
+        </div>
+
+        <div class="verdict-badge" id="verdictBadge">
+          <span id="verdictIcon">&#9679;</span>
+          <span id="verdictText">AWAITING ANALYSIS</span>
+        </div>
+      </div>
+
+      <!-- Threat details -->
+      <div class="report-card" id="reportCard">
+        <div class="report-row">
+          <span class="report-key">Category</span>
+          <span class="report-val" id="repCategory">--</span>
+        </div>
+        <div class="report-row">
+          <span class="report-key">Confidence</span>
+          <span class="report-val" id="repConfidence">--</span>
+        </div>
+        <div class="report-row">
+          <span class="report-key">Decision</span>
+          <span class="report-val" id="repDecision">--</span>
+        </div>
+        <div class="report-row">
+          <span class="report-key">HITL Triggered</span>
+          <span class="report-val" id="repHitl">No</span>
+        </div>
+        <div class="report-row">
+          <span class="report-key">Processing Time</span>
+          <span class="report-val" id="repTime">--</span>
+        </div>
+        <div class="report-row">
+          <span class="report-key">Patterns Matched</span>
+          <span class="report-val" id="repPatterns">--</span>
+        </div>
+      </div>
+
+      <!-- Reasoning -->
+      <div class="reasoning-box" id="reasoningBox">
+        <div class="reasoning-label">AI REASONING</div>
+        <div class="reasoning-text" id="reasoningText">Run an analysis to see results.</div>
+      </div>
+
+      <!-- Sanitized response -->
+      <div class="output-box" id="outputBox" style="display:none">
+        <div class="output-label">SANITIZED RESPONSE</div>
+        <div class="output-text" id="outputText"></div>
+      </div>
+
+      <!-- History log -->
+      <div class="history-section">
+        <div class="history-label">RECENT ANALYSES</div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">No analyses yet</div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ── HITL MODAL ────────────────────────────────────────────────────────── -->
+  <div class="hitl-backdrop" id="hitlBackdrop" style="display:none">
+    <div class="hitl-modal" id="hitlModal">
+      <div class="hitl-header">
+        <span class="hitl-icon">&#9888;</span>
+        <h3 class="hitl-title">HUMAN REVIEW REQUIRED</h3>
+        <div class="hitl-timer" id="hitlTimer">60s</div>
+      </div>
+
+      <div class="hitl-alert">
+        The Neural Firewall has flagged this input as ambiguous or high-risk.<br />
+        Your decision is required to continue.
+      </div>
+
+      <div class="hitl-detail-grid" id="hitlDetails">
+        <div class="hitl-field">
+          <span class="hitl-key">Threat Score</span>
+          <span class="hitl-val" id="hitlScore">--</span>
+        </div>
+        <div class="hitl-field">
+          <span class="hitl-key">Category</span>
+          <span class="hitl-val" id="hitlCategory">--</span>
+        </div>
+        <div class="hitl-field">
+          <span class="hitl-key">Disagreement Gap</span>
+          <span class="hitl-val" id="hitlGap">--</span>
+        </div>
+        <div class="hitl-field">
+          <span class="hitl-key">Confidence</span>
+          <span class="hitl-val" id="hitlConf">--</span>
+        </div>
+      </div>
+
+      <div class="hitl-input-preview">
+        <div class="hitl-key">FLAGGED INPUT</div>
+        <div class="hitl-input-text" id="hitlInputText"></div>
+      </div>
+
+      <div class="hitl-reasoning-wrap">
+        <div class="hitl-key">INSPECTOR REASONING</div>
+        <div class="hitl-reasoning-text" id="hitlReasoningText"></div>
+      </div>
+
+      <div class="hitl-reasoning-wrap">
+        <div class="hitl-key">PROBE AGENT COUNTER-ARGUMENT</div>
+        <div class="hitl-reasoning-text" id="hitlProbeText"></div>
+      </div>
+
+      <div class="hitl-actions">
+        <button class="hitl-btn deny-btn" id="hitlDenyBtn" onclick="submitHitlDecision('deny')">
+          &#10005; DENY &amp; BLOCK
+        </button>
+        <button class="hitl-btn approve-btn" id="hitlApproveBtn" onclick="submitHitlDecision('approve')">
+          &#10003; APPROVE &amp; ALLOW
+        </button>
+      </div>
+
+      <div class="hitl-warning">
+        This modal cannot be dismissed without a decision. Auto-deny in <span id="hitlCountdown">60</span>s.
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
