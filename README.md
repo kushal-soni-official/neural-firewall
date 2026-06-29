@@ -152,6 +152,7 @@ This project was built as the final Capstone Project for the **Kaggle 5-Day GenA
 
 <div align="center">
   
-*Built with precision. Designed for security. Powered by Google ADK.*
+&copy; 2026 **Kushal Soni**. All rights reserved.<br>
+*Engineered with precision for next-generation AI security.*
 
 </div>
