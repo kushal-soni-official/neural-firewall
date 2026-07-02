@@ -120,7 +120,7 @@ def create_output_sanitizer_agent() -> LlmAgent:
     """
     return LlmAgent(
         name="output_sanitizer",
-        model="gemini-1.5-flash",
+        model="gemini-flash-lite-latest",
         instruction=OUTPUT_SANITIZER_INSTRUCTION,
         description=(
             "Inspects AI agent responses before delivery to user. "

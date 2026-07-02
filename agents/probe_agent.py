@@ -87,7 +87,7 @@ def create_probe_agent() -> LlmAgent:
     """
     return LlmAgent(
         name="probe_agent",
-        model="gemini-1.5-flash",
+        model="gemini-flash-lite-latest",
         instruction=PROBE_AGENT_INSTRUCTION,
         description=(
             "Self-adversarial red-teamer. Challenges the Inspection Agent's conclusion "

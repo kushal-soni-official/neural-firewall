@@ -110,7 +110,7 @@ def create_inspection_agent() -> LlmAgent:
 
     return LlmAgent(
         name="inspection_agent",
-        model="gemini-1.5-flash",
+        model="gemini-flash-lite-latest",
         instruction=INSPECTION_AGENT_INSTRUCTION,
         tools=[mcp_toolset],
         description=(

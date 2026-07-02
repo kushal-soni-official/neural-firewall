@@ -146,7 +146,7 @@ def create_intake_agent() -> LlmAgent:
     """
     return LlmAgent(
         name="intake_agent",
-        model="gemini-1.5-flash",
+        model="gemini-flash-lite-latest",
         instruction=INTAKE_AGENT_INSTRUCTION,
         description=(
             "Normalizes raw user input: strips zero-width characters, replaces "

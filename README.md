@@ -71,7 +71,7 @@ graph TD
 | Component | Technology Used |
 |-----------|-----------------|
 | **Agent Framework** | Google ADK (`google-adk==1.2.1`) |
-| **Core LLM** | Gemini 1.5 Flash (via Google AI Studio) |
+| **Core LLM** | Gemini Flash Lite (via Google AI Studio) |
 | **Threat Intelligence** | FastMCP (`fastmcp>=2.0.0`) |
 | **Backend API** | FastAPI + Uvicorn |
 | **Database/Memory** | `aiosqlite` (Async SQLite) |

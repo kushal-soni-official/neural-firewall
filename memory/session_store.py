@@ -9,7 +9,7 @@ import json
 import asyncio
 import aiosqlite
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 _ENV_PATH = Path(__file__).parent.parent / ".env"
@@ -69,7 +69,7 @@ async def save_pipeline_result(result_dict: dict) -> None:
             """,
             (
                 result_dict.get("request_id", ""),
-                datetime.utcnow().isoformat(),
+                datetime.now(timezone.utc).isoformat(),
                 result_dict.get("threat_score", 0.0),
                 result_dict.get("category", "unknown"),
                 result_dict.get("final_decision", "block"),

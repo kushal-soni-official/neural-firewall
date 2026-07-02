@@ -176,6 +176,13 @@ class FirewallPipeline:
         result.request_id = sid
 
         try:
+            # ── CREATE SESSION (required in ADK 1.2.1+) ───────────────────────
+            await self.session_service.create_session(
+                app_name=APP_NAME,
+                user_id="firewall-system",
+                session_id=sid,
+            )
+
             # ── STAGE 1: LOCAL INTAKE PREPROCESSING ──────────────────────────
             print(f"[PIPELINE] [{sid[:8]}] Stage 1: Intake preprocessing...")
 
